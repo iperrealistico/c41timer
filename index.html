@@ -1,0 +1,2960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-title" content="CS41 Timer Pro">
+  <title>CS41 Timer Pro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f97316;
+      --bg-dark: #0f172a;
+      --bg-medium: #1e293b;
+      --bg-light: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --glass-bg: rgba(30, 41, 59, 0.8);
+      --glass-border: rgba(148, 163, 184, 0.1);
+    }
+    
+    /* Darkroom safelight mode */
+    body.darkroom-mode {
+      --primary: #8b0000;
+      --primary-dark: #660000;
+      --secondary: #8b0000;
+      --success: #8b0000;
+      --danger: #660000;
+      --warning: #8b0000;
+      --bg-dark: #1a0000;
+      --bg-medium: #330000;
+      --bg-light: #4d0000;
+      --text-primary: #8b0000;
+      --text-secondary: #660000;
+      --glass-bg: rgba(51, 0, 0, 0.8);
+      --glass-border: rgba(139, 0, 0, 0.1);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+    }
+    
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -100%;
+      left: -100%;
+      width: 300%;
+      height: 300%;
+      background: 
+        radial-gradient(ellipse at 20% 80%, rgba(99, 102, 241, 0.3) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 20%, rgba(245, 158, 11, 0.3) 0%, transparent 40%),
+        radial-gradient(ellipse at 40% 40%, rgba(16, 185, 129, 0.2) 0%, transparent 50%);
+      animation: lavaFlow 45s ease-in-out infinite;
+      z-index: -1;
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: -100%;
+      left: -100%;
+      width: 300%;
+      height: 300%;
+      background: 
+        radial-gradient(ellipse at 60% 70%, rgba(245, 158, 11, 0.2) 0%, transparent 40%),
+        radial-gradient(ellipse at 30% 30%, rgba(99, 102, 241, 0.2) 0%, transparent 45%);
+      animation: lavaFlow 60s ease-in-out infinite reverse;
+      z-index: -1;
+    }
+    
+    body.darkroom-mode::before {
+      background: 
+        radial-gradient(ellipse at 20% 80%, rgba(139, 0, 0, 0.3) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 20%, rgba(139, 0, 0, 0.2) 0%, transparent 40%),
+        radial-gradient(ellipse at 40% 40%, rgba(102, 0, 0, 0.2) 0%, transparent 50%);
+    }
+    
+    body.darkroom-mode::after {
+      background: 
+        radial-gradient(ellipse at 60% 70%, rgba(139, 0, 0, 0.15) 0%, transparent 40%),
+        radial-gradient(ellipse at 30% 30%, rgba(102, 0, 0, 0.15) 0%, transparent 45%);
+    }
+    
+    @keyframes lavaFlow {
+      0%, 100% { 
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+      20% {
+        transform: translate(-10%, 5%) scale(1.1) rotate(36deg);
+      }
+      40% {
+        transform: translate(5%, -10%) scale(0.95) rotate(72deg);
+      }
+      60% {
+        transform: translate(-5%, -5%) scale(1.05) rotate(108deg);
+      }
+      80% {
+        transform: translate(10%, 10%) scale(0.98) rotate(144deg);
+      }
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: slideDown 0.8s ease-out;
+    }
+    
+    .header h1 {
+      font-size: 3.5em;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      letter-spacing: -1px;
+      animation: glow 3s ease-in-out infinite;
+    }
+    
+    @keyframes glow {
+      0%, 100% { filter: brightness(1) drop-shadow(0 0 10px rgba(99, 102, 241, 0.5)); }
+      50% { filter: brightness(1.2) drop-shadow(0 0 20px rgba(99, 102, 241, 0.8)); }
+    }
+    
+    .header p {
+      color: var(--text-secondary);
+      font-size: 1.1em;
+      animation: fadeIn 1s ease-out 0.3s both;
+    }
+    
+    /* Glass panels */
+    .panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 25px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.8s ease-out;
+      transition: all 0.3s ease;
+    }
+    
+    .panel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .panel-header h2 {
+      font-size: 1.8em;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .panel-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    body.darkroom-mode .panel-icon {
+      color: #330000;
+    }
+    
+    .panel-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+    }
+    
+    .panel-icon svg * {
+      stroke: currentColor !important;
+      fill: none !important;
+    }
+    
+    /* Form elements */
+    .field-group {
+      margin-bottom: 20px;
+      animation: fadeInLeft 0.6s ease-out;
+    }
+    
+    .field-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 0.95em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-light);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1em;
+      transition: all 0.3s ease;
+      appearance: none;
+    }
+    
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-medium);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+    
+    /* Radio buttons */
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      margin-top: 10px;
+    }
+    
+    .radio-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .radio-wrapper input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+    
+    .radio-custom {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--text-secondary);
+      border-radius: 50%;
+      margin-right: 10px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .radio-wrapper input[type="radio"]:checked + .radio-custom {
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+    
+    .radio-wrapper input[type="radio"]:checked + .radio-custom::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      animation: popIn 0.3s ease;
+    }
+    
+    body.darkroom-mode .radio-wrapper input[type="radio"]:checked + .radio-custom::after {
+      background: #330000;
+    }
+    
+    @keyframes popIn {
+      0% { transform: translate(-50%, -50%) scale(0); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+    
+    /* Buttons */
+    .button {
+      width: 100%;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    
+    .button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    body.darkroom-mode .button::before {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .button:active::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .button-primary {
+      background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+    }
+    
+    body.darkroom-mode .button-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #330000;
+      box-shadow: 0 4px 20px rgba(139, 0, 0, 0.3);
+    }
+    
+    .button-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(16, 185, 129, 0.4);
+    }
+    
+    body.darkroom-mode .button-primary:hover {
+      box-shadow: 0 6px 30px rgba(139, 0, 0, 0.4);
+    }
+    
+    .button-danger {
+      background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+      color: white;
+      box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+    }
+    
+    body.darkroom-mode .button-danger {
+      background: linear-gradient(135deg, var(--danger) 0%, var(--primary-dark) 100%);
+      color: #330000;
+      box-shadow: 0 4px 20px rgba(102, 0, 0, 0.3);
+    }
+    
+    .button-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(239, 68, 68, 0.4);
+    }
+    
+    body.darkroom-mode .button-danger:hover {
+      box-shadow: 0 6px 30px rgba(102, 0, 0, 0.4);
+    }
+    
+    .button-pause {
+      background: linear-gradient(135deg, var(--warning) 0%, #ea580c 100%);
+      color: white;
+      box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
+    }
+    
+    body.darkroom-mode .button-pause {
+      background: linear-gradient(135deg, var(--warning) 0%, var(--primary-dark) 100%);
+      color: #330000;
+      box-shadow: 0 4px 20px rgba(139, 0, 0, 0.3);
+    }
+    
+    .button-pause:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(249, 115, 22, 0.4);
+    }
+    
+    body.darkroom-mode .button-pause:hover:not(:disabled) {
+      box-shadow: 0 6px 30px rgba(139, 0, 0, 0.4);
+    }
+    
+    .button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    /* Timer display */
+    .timer-display {
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+      border-radius: 20px;
+      margin: 20px 0;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .timer-display::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+      animation: shimmer 3s infinite;
+    }
+    
+    body.darkroom-mode .timer-display::before {
+      background: linear-gradient(45deg, transparent, rgba(139, 0, 0, 0.1), transparent);
+    }
+    
+    /* Timer display color animations */
+    .timer-display.flash-start {
+      animation: flashStart 0.4s ease-out;
+    }
+    
+    .timer-display.flash-inversion {
+      animation: flashInversion 0.4s ease-out;
+    }
+    
+    .timer-display.flash-phase-change {
+      animation: flashPhaseChange 0.4s ease-out;
+    }
+    
+    .timer-display.flash-end {
+      animation: flashEnd 0.8s ease-out;
+    }
+    
+    .timer-display.flash-prepare {
+      animation: flashPrepare 0.4s ease-out;
+    }
+    
+    @keyframes flashStart {
+      0% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+      }
+      50% { 
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.5) 0%, rgba(16, 185, 129, 0.2) 100%);
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+      }
+      100% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+    
+    body.darkroom-mode .timer-display.flash-start {
+      animation: flashStartDarkroom 0.4s ease-out;
+    }
+    
+    @keyframes flashStartDarkroom {
+      0% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(139, 0, 0, 0);
+      }
+      50% { 
+        background: linear-gradient(135deg, rgba(139, 0, 0, 0.5) 0%, rgba(139, 0, 0, 0.2) 100%);
+        box-shadow: 0 0 30px rgba(139, 0, 0, 0.6);
+      }
+      100% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(139, 0, 0, 0);
+      }
+    }
+    
+    @keyframes flashInversion {
+      0% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(249, 115, 22, 0);
+      }
+      50% { 
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.5) 0%, rgba(249, 115, 22, 0.2) 100%);
+        box-shadow: 0 0 30px rgba(249, 115, 22, 0.6);
+      }
+      100% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(249, 115, 22, 0);
+      }
+    }
+    
+    body.darkroom-mode .timer-display.flash-inversion {
+      animation: flashInversionDarkroom 0.4s ease-out;
+    }
+    
+    @keyframes flashInversionDarkroom {
+      0% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(139, 0, 0, 0);
+      }
+      50% { 
+        background: linear-gradient(135deg, rgba(139, 0, 0, 0.5) 0%, rgba(102, 0, 0, 0.2) 100%);
+        box-shadow: 0 0 30px rgba(139, 0, 0, 0.6);
+      }
+      100% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(139, 0, 0, 0);
+      }
+    }
+    
+    @keyframes flashPhaseChange {
+      0% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(99, 102, 241, 0);
+      }
+      50% { 
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.5) 0%, rgba(99, 102, 241, 0.2) 100%);
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+      }
+      100% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(99, 102, 241, 0);
+      }
+    }
+    
+    body.darkroom-mode .timer-display.flash-phase-change {
+      animation: flashPhaseChangeDarkroom 0.4s ease-out;
+    }
+    
+    @keyframes flashPhaseChangeDarkroom {
+      0% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(102, 0, 0, 0);
+      }
+      50% { 
+        background: linear-gradient(135deg, rgba(102, 0, 0, 0.5) 0%, rgba(102, 0, 0, 0.2) 100%);
+        box-shadow: 0 0 30px rgba(102, 0, 0, 0.6);
+      }
+      100% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(102, 0, 0, 0);
+      }
+    }
+    
+    @keyframes flashEnd {
+      0% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+      }
+      25% { 
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.5) 0%, rgba(16, 185, 129, 0.2) 100%);
+        box-shadow: 0 0 40px rgba(16, 185, 129, 0.7);
+      }
+      50% { 
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.5) 0%, rgba(99, 102, 241, 0.2) 100%);
+        box-shadow: 0 0 40px rgba(99, 102, 241, 0.7);
+      }
+      75% { 
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.5) 0%, rgba(245, 158, 11, 0.2) 100%);
+        box-shadow: 0 0 40px rgba(245, 158, 11, 0.7);
+      }
+      100% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+      }
+    }
+    
+    body.darkroom-mode .timer-display.flash-end {
+      animation: flashEndDarkroom 0.8s ease-out;
+    }
+    
+    @keyframes flashEndDarkroom {
+      0% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(139, 0, 0, 0);
+      }
+      50% { 
+        background: linear-gradient(135deg, rgba(139, 0, 0, 0.6) 0%, rgba(102, 0, 0, 0.3) 100%);
+        box-shadow: 0 0 40px rgba(139, 0, 0, 0.7);
+      }
+      100% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(139, 0, 0, 0);
+      }
+    }
+    
+    @keyframes flashPrepare {
+      0% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+      }
+      50% { 
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.5) 0%, rgba(245, 158, 11, 0.2) 100%);
+        box-shadow: 0 0 30px rgba(245, 158, 11, 0.6);
+      }
+      100% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+      }
+    }
+    
+    body.darkroom-mode .timer-display.flash-prepare {
+      animation: flashPrepareDarkroom 0.4s ease-out;
+    }
+    
+    @keyframes flashPrepareDarkroom {
+      0% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(139, 0, 0, 0);
+      }
+      50% { 
+        background: linear-gradient(135deg, rgba(139, 0, 0, 0.5) 0%, rgba(139, 0, 0, 0.2) 100%);
+        box-shadow: 0 0 30px rgba(139, 0, 0, 0.6);
+      }
+      100% { 
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%);
+        box-shadow: 0 0 0 rgba(139, 0, 0, 0);
+      }
+    }
+    
+    @keyframes shimmer {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .phase-label {
+      font-size: 1.4em;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+    
+    .timer-value {
+      font-size: 4.5em;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+      animation: timerGlow 2s ease-in-out infinite;
+    }
+    
+    @keyframes timerGlow {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.2); }
+    }
+    
+    .inversion-message {
+      font-size: 1.3em;
+      color: var(--warning);
+      margin-top: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      animation: blink 1s ease-in-out infinite;
+      min-height: 1.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* Info box */
+    .info-box {
+      background: var(--bg-light);
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      font-size: 0.95em;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      animation: slideInRight 0.8s ease-out;
+    }
+    
+    .info-box strong {
+      color: var(--text-primary);
+    }
+    
+    /* Settings button */
+    .settings-toggle {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .settings-toggle:hover {
+      transform: scale(1.1) rotate(180deg);
+    }
+    
+    .settings-toggle svg {
+      width: 28px;
+      height: 28px;
+      fill: white;
+    }
+    
+    body.darkroom-mode .settings-toggle svg {
+      fill: #330000;
+    }
+    
+    /* Settings panel */
+    .settings-panel {
+      position: fixed;
+      right: -400px;
+      top: 0;
+      width: 400px;
+      height: 100vh;
+      background: var(--bg-medium);
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+      transition: right 0.3s ease;
+      z-index: 999;
+      overflow-y: auto;
+      padding: 30px;
+    }
+    
+    .settings-panel.active {
+      right: 0;
+    }
+    
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .settings-header h3 {
+      font-size: 1.8em;
+      color: var(--text-primary);
+    }
+    
+    .close-settings {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5em;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    
+    .close-settings:hover {
+      color: var(--text-primary);
+    }
+    
+    /* Volume slider */
+    .volume-control {
+      margin: 20px 0;
+    }
+    
+    .slider {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-light);
+      border-radius: 4px;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 2px 15px rgba(99, 102, 241, 0.5);
+    }
+    
+    body.darkroom-mode .slider::-webkit-slider-thumb {
+      box-shadow: 0 2px 10px rgba(139, 0, 0, 0.3);
+    }
+    
+    body.darkroom-mode .slider::-webkit-slider-thumb:hover {
+      box-shadow: 0 2px 15px rgba(139, 0, 0, 0.5);
+    }
+    
+    /* Animations */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header h1 { font-size: 2.5em; }
+      .timer-value { font-size: 3.5em; }
+      .settings-panel { width: 100%; right: -100%; }
+      .panel { padding: 20px; }
+    }
+    
+    /* Developer type selector */
+    .developer-type-selector {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    
+    .dev-type-option {
+      flex: 1;
+      padding: 20px;
+      background: var(--bg-light);
+      border: 2px solid transparent;
+      border-radius: 16px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .dev-type-option::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    body.darkroom-mode .dev-type-option::before {
+      background: radial-gradient(circle, rgba(139, 0, 0, 0.1) 0%, transparent 70%);
+    }
+    
+    .dev-type-option:hover::before {
+      opacity: 1;
+    }
+    
+    .dev-type-option.active {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-color: var(--primary);
+      color: white;
+    }
+    
+    body.darkroom-mode .dev-type-option.active {
+      color: #330000;
+    }
+    
+    .dev-type-option:hover:not(.active) {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .dev-type-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .dev-type-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .dev-type-option span {
+      display: block;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+    
+    /* Films counter */
+    .films-counter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 10px;
+      padding: 20px;
+      background: var(--bg-light);
+      border-radius: 16px;
+    }
+    
+    .counter-btn {
+      width: 50px;
+      height: 50px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      font-size: 1.5em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    body.darkroom-mode .counter-btn {
+      color: #330000;
+    }
+    
+    .counter-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+    
+    body.darkroom-mode .counter-btn:hover {
+      box-shadow: 0 4px 20px rgba(139, 0, 0, 0.4);
+    }
+    
+    .counter-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .counter-display {
+      text-align: center;
+      min-width: 100px;
+    }
+    
+    .counter-display #filmsCount {
+      display: block;
+      font-size: 2.5em;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+    }
+    
+    .counter-label {
+      display: block;
+      font-size: 0.9em;
+      color: var(--text-secondary);
+      margin-top: 5px;
+    }
+    
+    /* Agitation selector */
+    .agitation-selector {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    
+    .agitation-option {
+      flex: 1;
+      padding: 15px;
+      background: var(--bg-light);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .agitation-option.active {
+      border-color: var(--primary);
+      background: var(--bg-medium);
+    }
+    
+    .agitation-option:hover:not(.active) {
+      border-color: var(--glass-border);
+    }
+    
+    .agitation-icon {
+      font-size: 2em;
+      margin-bottom: 5px;
+      animation: none;
+    }
+    
+    .agitation-option.active .agitation-icon.intermittent {
+      animation: upDown 2s ease-in-out infinite;
+      color: var(--primary);
+    }
+    
+    .agitation-option.active .agitation-icon.continuous {
+      animation: rotate 3s linear infinite;
+      color: var(--primary);
+    }
+    
+    @keyframes upDown {
+      0%, 100% { transform: translateY(0); }
+      25% { transform: translateY(-5px); }
+      75% { transform: translateY(5px); }
+    }
+    
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .agitation-option span {
+      display: block;
+      font-weight: 600;
+    }
+    
+    .agitation-option small {
+      display: block;
+      font-size: 0.8em;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    
+    /* Push/Pull controls */
+    .push-pull-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 10px;
+      padding: 20px;
+      background: var(--bg-light);
+      border-radius: 16px;
+    }
+    
+    .pp-btn {
+      width: 50px;
+      height: 50px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      font-size: 1.5em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    body.darkroom-mode .pp-btn {
+      color: #330000;
+    }
+    
+    .pp-btn:hover:not(:disabled) {
+      transform: scale(1.1);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+    
+    body.darkroom-mode .pp-btn:hover:not(:disabled) {
+      box-shadow: 0 4px 20px rgba(139, 0, 0, 0.4);
+    }
+    
+    .pp-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .pp-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .pp-display {
+      text-align: center;
+      min-width: 100px;
+    }
+    
+    .pp-display #ppValue {
+      display: block;
+      font-size: 2.5em;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+    }
+    
+    .pp-label {
+      display: block;
+      font-size: 0.9em;
+      color: var(--text-secondary);
+      margin-top: 5px;
+    }
+    
+    .pp-info {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.85em;
+      color: var(--text-secondary);
+    }
+    
+    /* Hide reuse fields initially */
+    #reuseFields {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .agitation-note {
+      margin-top: 10px;
+      padding: 10px 15px;
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 3px solid var(--secondary);
+      border-radius: 6px;
+      font-size: 0.85em;
+      color: var(--text-secondary);
+      font-style: italic;
+      display: none;
+    }
+    
+    /* Custom dropdown styles */
+    .custom-select {
+      position: relative;
+      width: 100%;
+    }
+    
+    .custom-select-trigger {
+      width: 100%;
+      padding: 12px 40px 12px 16px;
+      background: var(--bg-light);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .custom-select-trigger:hover,
+    .custom-select.open .custom-select-trigger {
+      border-color: var(--primary);
+      background: var(--bg-medium);
+    }
+    
+    .custom-select-trigger::after {
+      content: '▼';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: transform 0.3s ease;
+      color: var(--text-secondary);
+    }
+    
+    .custom-select.open .custom-select-trigger::after {
+      transform: translateY(-50%) rotate(180deg);
+    }
+    
+    .custom-select-options {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 4px;
+      background: var(--bg-medium);
+      border: 2px solid var(--glass-border);
+      border-radius: 12px;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 10;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    
+    .custom-select.open .custom-select-options {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .custom-select-option {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .custom-select-option:last-child {
+      border-bottom: none;
+    }
+    
+    .custom-select-option:hover,
+    .custom-select-option.selected {
+      background: var(--primary);
+      color: white;
+    }
+    
+    body.darkroom-mode .custom-select-option:hover,
+    body.darkroom-mode .custom-select-option.selected {
+      background: #8b0000;
+      color: #330000;
+    }
+    
+    /* Inversion count selector */
+    .inversion-count-selector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 10px;
+      padding: 20px;
+      background: var(--bg-light);
+      border-radius: 16px;
+    }
+    
+    .inversion-count-btn {
+      width: 50px;
+      height: 50px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      font-size: 1.5em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    body.darkroom-mode .inversion-count-btn {
+      color: #330000;
+    }
+    
+    .inversion-count-btn:hover:not(:disabled) {
+      transform: scale(1.1);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+    
+    body.darkroom-mode .inversion-count-btn:hover:not(:disabled) {
+      box-shadow: 0 4px 20px rgba(139, 0, 0, 0.4);
+    }
+    
+    .inversion-count-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .inversion-count-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .inversion-count-display {
+      text-align: center;
+      min-width: 100px;
+    }
+    
+    .inversion-count-display #inversionCount,
+    .inversion-count-display #intervalMultValue {
+      display: block;
+      font-size: 2.5em;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+    }
+    
+    .inversion-count-label {
+      display: block;
+      font-size: 0.9em;
+      color: var(--text-secondary);
+      margin-top: 5px;
+    }
+    
+    /* Progress bar */
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-light);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      width: 0%;
+      transition: width 1s linear;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+    
+    body.darkroom-mode .progress-fill {
+      box-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
+    }
+    
+    /* Interval preview */
+    #intervalPreview {
+      margin-top: 10px;
+      font-size: 0.85em;
+      color: var(--text-secondary);
+      text-align: center;
+      padding: 8px;
+      background: var(--bg-light);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    #intervalPreview strong {
+      color: var(--primary);
+      font-size: 1.2em;
+    }
+    
+    #intervalPreview em {
+      opacity: 0.7;
+    }
+    
+    /* Checkbox styles - Custom implementation for darkroom mode */
+    input[type="checkbox"] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--text-secondary);
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      margin-right: 10px;
+      vertical-align: middle;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    input[type="checkbox"]:checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    
+    body.darkroom-mode input[type="checkbox"]:checked {
+      background: #8b0000;
+      border-color: #8b0000;
+    }
+    
+    body.darkroom-mode input[type="checkbox"]:checked::after {
+      color: #330000;
+    }
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>CS41 Timer Pro</h1>
+      <p>Professional C-41 Film Development Timer</p>
+    </div>
+    
+    <!-- Developer Settings Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Developer Settings</h2>
+        <div class="panel-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2"/>
+            <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2"/>
+            <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="field-group">
+        <label for="temperature">Developer Temperature</label>
+        <div class="custom-select" id="temperatureSelect">
+          <div class="custom-select-trigger">
+            <span>102°F (≈39°C)</span>
+          </div>
+          <div class="custom-select-options">
+            <div class="custom-select-option" data-value="72">72°F (≈22°C)</div>
+            <div class="custom-select-option" data-value="80">80°F (≈27°C)</div>
+            <div class="custom-select-option" data-value="85">85°F (≈29°C)</div>
+            <div class="custom-select-option" data-value="90">90°F (≈32°C)</div>
+            <div class="custom-select-option" data-value="95">95°F (≈35°C)</div>
+            <div class="custom-select-option selected" data-value="102">102°F (≈39°C)</div>
+          </div>
+        </div>
+        <input type="hidden" id="temperature" value="102">
+      </div>
+      
+      <div class="field-group">
+        <label for="pushPullMode">Processing Mode</label>
+        <div class="custom-select" id="pushPullModeSelect">
+          <div class="custom-select-trigger">
+            <span>Standard Processing</span>
+          </div>
+          <div class="custom-select-options">
+            <div class="custom-select-option selected" data-value="standard">Standard Processing</div>
+            <div class="custom-select-option" data-value="pushpull">Push/Pull Processing</div>
+          </div>
+        </div>
+        <input type="hidden" id="pushPullMode" value="standard">
+      </div>
+      
+      <div id="pushPullSelector" style="display: none;">
+        <div class="field-group">
+          <label>Push/Pull Adjustment</label>
+          <div class="push-pull-controls">
+            <button class="pp-btn minus" id="ppDecrease">−</button>
+            <div class="pp-display">
+              <span id="ppValue">+1</span>
+              <span class="pp-label">stop</span>
+            </div>
+            <button class="pp-btn plus" id="ppIncrease">+</button>
+          </div>
+          <input type="hidden" id="pushPullValue" value="1">
+          <div class="pp-info">Pull -1 to Push +3</div>
+        </div>
+      </div>
+      
+      <div class="field-group">
+        <label>Developer Type</label>
+        <div class="developer-type-selector">
+          <div class="dev-type-option active" data-value="new">
+            <div class="dev-type-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+            </div>
+            <span>Fresh Chemistry</span>
+          </div>
+          <div class="dev-type-option" data-value="reused">
+            <div class="dev-type-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4V2L8 6L12 10V8C15.31 8 18 10.69 18 14C18 14.68 17.87 15.33 17.64 15.93L19.06 17.35C19.67 16.33 20 15.2 20 14C20 9.58 16.42 6 12 6V4Z" stroke="none"/>
+                <path d="M12 20V22L16 18L12 14V16C8.69 16 6 13.31 6 10C6 9.32 6.13 8.67 6.36 8.07L4.94 6.65C4.33 7.67 4 8.8 4 10C4 14.42 7.58 18 12 18V20Z" stroke="none"/>
+              </svg>
+            </div>
+            <span>Reused Chemistry</span>
+          </div>
+        </div>
+      </div>
+      
+      <div id="reuseFields">
+        <div class="field-group">
+          <label for="volume">Solution Volume</label>
+          <div class="custom-select" id="volumeSelect">
+            <div class="custom-select-trigger">
+              <span>Quart (946 ml)</span>
+            </div>
+            <div class="custom-select-options">
+              <div class="custom-select-option" data-value="pint">Pint (473 ml)</div>
+              <div class="custom-select-option selected" data-value="quart">Quart (946 ml)</div>
+              <div class="custom-select-option" data-value="gallon">Gallon (3785 ml)</div>
+            </div>
+          </div>
+          <input type="hidden" id="volume" value="quart">
+        </div>
+        <div class="field-group">
+          <label for="filmsProcessed">Films Previously Processed</label>
+          <div class="films-counter">
+            <button class="counter-btn minus" id="filmsDecrease">−</button>
+            <div class="counter-display">
+              <span id="filmsCount">1</span>
+              <span class="counter-label">films</span>
+            </div>
+            <button class="counter-btn plus" id="filmsIncrease">+</button>
+          </div>
+          <input type="hidden" id="filmsProcessed" value="1">
+        </div>
+      </div>
+      
+      <div class="field-group">
+        <label>Agitation Mode</label>
+        <div class="agitation-selector">
+          <div class="agitation-option active" data-value="intermittent">
+            <div class="agitation-icon intermittent">↕</div>
+            <span>Intermittent</span>
+            <small>Recommended</small>
+          </div>
+          <div class="agitation-option" data-value="continuous">
+            <div class="agitation-icon continuous">↻</div>
+            <span>Continuous</span>
+            <small>Alternative *</small>
+          </div>
+        </div>
+        <input type="hidden" id="agitationMode" value="intermittent">
+        <div class="agitation-note">
+          * Manual time adjustment may be needed for optimal results
+        </div>
+      </div>
+      
+      <div id="inversionValidationWarning" class="agitation-note" style="display: none; background: rgba(239, 68, 68, 0.1); border-color: var(--danger);">
+        <strong>Configuration Invalid:</strong> <span id="validationMessage"></span>
+      </div>
+      
+      <button id="calculateAndStart" class="button button-primary">
+        Start Development Process
+      </button>
+      
+      <div id="explanation" class="info-box"></div>
+    </div>
+    
+    <!-- Process Timer Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Process Timer</h2>
+        <div class="panel-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
+            <path d="M12 6V12L16 16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="timer-display" id="timerDisplay">
+        <div class="phase-label" id="phaseDisplay">Ready to Start</div>
+        <div class="timer-value" id="timerValue">00:00</div>
+        <div class="inversion-message" id="inversionMessage"></div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressBar"></div>
+        </div>
+      </div>
+      
+      <button id="pauseTimer" class="button button-pause" disabled>Pause</button>
+      <button id="stopTimer" class="button button-danger">Stop & Reload Page</button>
+    </div>
+  </div>
+  
+  <!-- Settings Toggle -->
+  <div class="settings-toggle" id="settingsToggle">
+    <svg viewBox="0 0 24 24">
+      <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5a3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97c0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1c0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/>
+    </svg>
+  </div>
+  
+  <!-- Settings Panel -->
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <h3>Settings</h3>
+      <button class="close-settings" id="closeSettings">×</button>
+    </div>
+    
+    <div class="field-group">
+      <label for="soundVolume">Sound Volume</label>
+      <input type="range" id="soundVolume" class="slider" min="0" max="100" value="30">
+      <div style="text-align: center; margin-top: 5px;">
+        <span id="volumeValue">30%</span>
+      </div>
+    </div>
+    
+    <div class="field-group">
+      <label for="phaseDelay">Phase Transition Delay (seconds)</label>
+      <input type="number" id="phaseDelay" value="10" min="5" max="30" step="1">
+    </div>
+    
+    <div class="field-group">
+      <label for="inversionInterval">Inversion Sound Interval (seconds)</label>
+      <input type="number" id="inversionInterval" value="2" min="1" max="5" step="0.5">
+    </div>
+    
+    <div class="field-group">
+      <label>Sound Theme</label>
+      <div class="radio-group" style="flex-direction: column; gap: 10px;">
+        <label class="radio-wrapper">
+          <input type="radio" name="soundTheme" value="modern" checked>
+          <span class="radio-custom"></span>
+          <span>Modern</span>
+        </label>
+        <label class="radio-wrapper">
+          <input type="radio" name="soundTheme" value="classic">
+          <span class="radio-custom"></span>
+          <span>Classic</span>
+        </label>
+        <label class="radio-wrapper">
+          <input type="radio" name="soundTheme" value="minimal">
+          <span class="radio-custom"></span>
+          <span>Minimal</span>
+        </label>
+      </div>
+    </div>
+    
+    <div class="field-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="visualEffects" checked>
+        Enable Visual Effects
+      </label>
+    </div>
+    
+    <div class="field-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="vibration" checked>
+        Enable Vibration (Mobile)
+      </label>
+    </div>
+    
+    <div class="field-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="clickSounds" checked>
+        Enable Click Sounds
+      </label>
+    </div>
+    
+    <div class="field-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="darkroomMode">
+        Darkroom Safelight Mode
+      </label>
+    </div>
+    
+    <div class="field-group">
+      <label for="inversionNumber">Number of Inversions</label>
+      <div class="inversion-count-selector">
+        <button class="inversion-count-btn minus" id="inversionDecrease">−</button>
+        <div class="inversion-count-display">
+          <span id="inversionCount">4</span>
+          <span class="inversion-count-label">inversions</span>
+        </div>
+        <button class="inversion-count-btn plus" id="inversionIncrease">+</button>
+      </div>
+      <input type="hidden" id="inversionNumber" value="4">
+    </div>
+    
+    <div class="field-group">
+      <label for="inversionIntervalMultiplier">Inversion Group Interval Multiplier</label>
+      <div class="inversion-count-selector">
+        <button class="inversion-count-btn minus" id="intervalMultDecrease">−</button>
+        <div class="inversion-count-display">
+          <span id="intervalMultValue">1.0</span>
+          <span class="inversion-count-label">multiplier</span>
+        </div>
+        <button class="inversion-count-btn plus" id="intervalMultIncrease">+</button>
+      </div>
+      <input type="hidden" id="inversionIntervalMultiplier" value="1.0">
+      <div id="intervalPreview">
+        Interval: 30s (standard CS41 timing)
+      </div>
+    </div>
+    
+    <div class="field-group">
+      <label>Blix Time</label>
+      <div class="blix-time-selector">
+        <label class="radio-wrapper">
+          <input type="radio" name="blixMode" value="fixed" checked>
+          <span class="radio-custom"></span>
+          <span>Fixed Time</span>
+        </label>
+        <label class="radio-wrapper">
+          <input type="radio" name="blixMode" value="dynamic">
+          <span class="radio-custom"></span>
+          <span>Dynamic (like developer)</span>
+        </label>
+      </div>
+      <div id="fixedBlixTime" style="margin-top: 10px;">
+        <input type="number" id="blixTime" value="8" min="1" step="0.1" style="width: 100px;">
+        <span style="margin-left: 10px;">minutes</span>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Enhanced audio system with configurable volume and themes
+    class AudioSystem {
+      constructor() {
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.volume = 0.3;
+        this.theme = 'modern';
+        this.clickSoundsEnabled = true;
+      }
+      
+      setVolume(value) {
+        this.volume = value / 100;
+      }
+      
+      setTheme(theme) {
+        this.theme = theme;
+      }
+      
+      setClickSounds(enabled) {
+        this.clickSoundsEnabled = enabled;
+      }
+      
+      play(type) {
+        if (this.audioCtx.state === 'suspended') {
+          this.audioCtx.resume();
+        }
+        
+        const themes = {
+          modern: {
+            inversion: { freq: [800, 1200], duration: 300, type: 'square' },
+            pause: { freq: [400, 200], duration: 200, type: 'sine' },
+            resume: { freq: [200, 400], duration: 200, type: 'sine' },
+            stop: { freq: [300, 150], duration: 300, type: 'sawtooth' },
+            phaseChange: { freq: [1000, 800, 1200], duration: 500, type: 'triangle' },
+            phaseEnd: { freq: [800, 600, 400], duration: 400, type: 'sine' },
+            start: { freq: [440, 880], duration: 200, type: 'sine' },
+            click: { freq: [2000], duration: 50, type: 'sine' },
+            prepare: { freq: [600, 700], duration: 150, type: 'sine' }
+          },
+          classic: {
+            inversion: { freq: [880], duration: 200, type: 'sine' },
+            pause: { freq: [440], duration: 150, type: 'sine' },
+            resume: { freq: [660], duration: 150, type: 'sine' },
+            stop: { freq: [220], duration: 300, type: 'sine' },
+            phaseChange: { freq: [880, 660], duration: 400, type: 'sine' },
+            phaseEnd: { freq: [660, 440], duration: 300, type: 'sine' },
+            start: { freq: [550], duration: 200, type: 'sine' },
+            click: { freq: [1500], duration: 30, type: 'sine' },
+            prepare: { freq: [550], duration: 100, type: 'sine' }
+          },
+          minimal: {
+            inversion: { freq: [1000], duration: 100, type: 'sine' },
+            pause: { freq: [300], duration: 100, type: 'sine' },
+            resume: { freq: [400], duration: 100, type: 'sine' },
+            stop: { freq: [200], duration: 200, type: 'sine' },
+            phaseChange: { freq: [800], duration: 300, type: 'sine' },
+            phaseEnd: { freq: [600], duration: 200, type: 'sine' },
+            start: { freq: [500], duration: 150, type: 'sine' },
+            click: { freq: [1200], duration: 20, type: 'sine' },
+            prepare: { freq: [700], duration: 80, type: 'sine' }
+          }
+        };
+        
+        if (type === 'click' && !this.clickSoundsEnabled) return;
+        
+        const sound = themes[this.theme][type];
+        if (!sound) return;
+        
+        const freqs = Array.isArray(sound.freq) ? sound.freq : [sound.freq];
+        const duration = sound.duration / freqs.length;
+        
+        freqs.forEach((freq, index) => {
+          setTimeout(() => {
+            const oscillator = this.audioCtx.createOscillator();
+            const gainNode = this.audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.audioCtx.destination);
+            
+            oscillator.frequency.value = freq;
+            oscillator.type = sound.type;
+            
+            gainNode.gain.setValueAtTime(0, this.audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(this.volume, this.audioCtx.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + duration / 1000);
+            
+            oscillator.start(this.audioCtx.currentTime);
+            oscillator.stop(this.audioCtx.currentTime + duration / 1000);
+          }, index * duration);
+        });
+        
+        // Vibration support
+        if (document.getElementById('vibration').checked && 'vibrate' in navigator) {
+          const patterns = {
+            inversion: [100, 50, 100],
+            pause: [200],
+            resume: [100, 100],
+            stop: [300],
+            phaseChange: [200, 100, 200],
+            phaseEnd: [150, 50, 150],
+            start: [100],
+            click: [10],
+            prepare: [50, 50]
+          };
+          navigator.vibrate(patterns[type] || 100);
+        }
+      }
+    }
+    
+    // Global variables
+    const audioSystem = new AudioSystem();
+    const volumeML = { pint: 473, quart: 946, gallon: 3785 };
+    
+    let currentPhase = null;
+    let timerInterval = null;
+    let remainingSeconds = 0;
+    let totalSeconds = 0;
+    let initialInversionInterval = null;
+    let subsequentInversionTimeout = null;
+    let phaseStartTimestamp = null;
+    let isPaused = false;
+    let pauseStartTime = 0;
+    let inversionScheduled = false;
+    let currentInitialInversionDelay = 10000;
+    let currentSubsequentInversionInterval = 30000;
+    let isProcessRunning = false;
+    let inversionSoundInterval = 2000;
+    let nextInversionTime = null;
+    let inversionCountdownInterval = null;
+    let isInversionSeries = false;
+    let lastInversionEndTime = null;
+    
+    // UI Elements
+    const pauseButton = document.getElementById('pauseTimer');
+    const progressBar = document.getElementById('progressBar');
+    const timerDisplayElement = document.getElementById('timerDisplay');
+    
+    // Add flash animation to timer display
+    function flashTimerDisplay(type) {
+      if (!document.getElementById('visualEffects').checked) return;
+      
+      timerDisplayElement.classList.remove('flash-start', 'flash-inversion', 'flash-phase-change', 'flash-end', 'flash-prepare');
+      void timerDisplayElement.offsetWidth; // Force reflow
+      timerDisplayElement.classList.add(`flash-${type}`);
+      
+      setTimeout(() => {
+        timerDisplayElement.classList.remove(`flash-${type}`);
+      }, 400);
+    }
+    
+    // Settings
+    document.getElementById('settingsToggle').addEventListener('click', () => {
+      if (isProcessRunning) return; // Don't allow settings changes during process
+      
+      const panel = document.getElementById('settingsPanel');
+      if (panel.classList.contains('active')) {
+        panel.classList.remove('active');
+      } else {
+        panel.classList.add('active');
+      }
+      audioSystem.play('click');
+    });
+    
+    document.getElementById('closeSettings').addEventListener('click', () => {
+      document.getElementById('settingsPanel').classList.remove('active');
+      audioSystem.play('click');
+    });
+    
+    document.getElementById('soundVolume').addEventListener('input', (e) => {
+      const value = e.target.value;
+      document.getElementById('volumeValue').textContent = value + '%';
+      audioSystem.setVolume(value);
+    });
+    
+    document.getElementById('inversionInterval').addEventListener('change', (e) => {
+      inversionSoundInterval = parseFloat(e.target.value) * 1000;
+      updateExplanation(); // This will also validate and update preview
+    });
+    
+    document.querySelectorAll('input[name="soundTheme"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        audioSystem.setTheme(e.target.value);
+        audioSystem.play('click');
+      });
+    });
+    
+    document.getElementById('clickSounds').addEventListener('change', (e) => {
+      audioSystem.setClickSounds(e.target.checked);
+      if (e.target.checked) audioSystem.play('click');
+    });
+    
+    document.getElementById('darkroomMode').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        document.body.classList.add('darkroom-mode');
+      } else {
+        document.body.classList.remove('darkroom-mode');
+      }
+      audioSystem.play('click');
+    });
+    
+    // Enhanced inversion message display
+    function displayInversionMessage(text, duration = 1500) {
+      const div = document.getElementById('inversionMessage');
+      div.textContent = text;
+      
+      if (document.getElementById('visualEffects').checked) {
+        div.style.animation = 'none';
+        setTimeout(() => {
+          div.style.animation = 'blink 1s ease-in-out';
+        }, 10);
+      }
+      
+      if (duration > 0) {
+        setTimeout(() => {
+          // Don't clear if we're showing countdown
+          if (!text.includes('Next inversion in')) {
+            div.textContent = '';
+            updateInversionCountdown();
+          }
+        }, duration);
+      }
+    }
+    
+    // Update inversion countdown
+    function updateInversionCountdown() {
+      if (!isProcessRunning || isPaused || !nextInversionTime || isInversionSeries) {
+        if (!isInversionSeries && !isPaused) {
+          document.getElementById('inversionMessage').textContent = '';
+        }
+        return;
+      }
+      
+      const now = Date.now();
+      const timeUntilNext = Math.max(0, Math.floor((nextInversionTime - now) / 1000));
+      
+      if (timeUntilNext > 3 && document.getElementById('agitationMode').value === 'intermittent') {
+        document.getElementById('inversionMessage').textContent = `Next inversion in ${timeUntilNext} seconds...`;
+      } else {
+        document.getElementById('inversionMessage').textContent = '';
+      }
+    }
+    
+    // Format time display
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    
+    // Update progress bar
+    function updateProgressBar() {
+      if (totalSeconds > 0) {
+        const progress = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
+        progressBar.style.width = progress + '%';
+      }
+    }
+    
+    // Base development times at different temperatures
+    const baseDevTimes = {
+      "72": 50,
+      "80": 21,
+      "85": 13,
+      "90": 8.5,
+      "95": 5.75,
+      "102": 3.5
+    };
+    
+    // Calculate development time
+    function calculateDevelopmentTime() {
+      const tempF = document.getElementById('temperature').value;
+      let baseTime = baseDevTimes[tempF];
+      
+      // Apply push/pull adjustment if enabled
+      const pushPullMode = document.getElementById('pushPullMode').value;
+      if (pushPullMode === 'pushpull' && tempF >= 85 && tempF <= 102) {
+        const ppValue = parseInt(document.getElementById('pushPullValue').value) || 0;
+        baseTime *= (1 + ppValue * 0.3); // Each stop is 30%
+      }
+      
+      // Apply reuse adjustments if needed
+      const devType = document.querySelector('.dev-type-option.active').dataset.value;
+      if (devType === 'reused') {
+        const volume = document.getElementById('volume').value;
+        const films = parseInt(document.getElementById('filmsProcessed').value) || 1;
+        const extraPercent = volume === 'pint' ? 0.04 : volume === 'quart' ? 0.02 : 0.005;
+        baseTime *= (1 + extraPercent * films);
+      }
+      
+      return baseTime;
+    }
+    
+    // Calculate blix time
+    function calculateBlixTime() {
+      let blixTime = parseFloat(document.getElementById('blixTime').value);
+      
+      if (document.querySelector('input[name="blixMode"]:checked').value === 'dynamic') {
+        const devType = document.querySelector('.dev-type-option.active').dataset.value;
+        if (devType === 'reused') {
+          const volume = document.getElementById('volume').value;
+          const films = parseInt(document.getElementById('filmsProcessed').value) || 1;
+          const extraPercent = volume === 'pint' ? 0.04 : volume === 'quart' ? 0.02 : 0.005;
+          blixTime *= (1 + extraPercent * films);
+        }
+      }
+      
+      return blixTime;
+    }
+    
+    // Update interval preview
+    function updateIntervalPreview() {
+      const previewDiv = document.getElementById('intervalPreview');
+      
+      if (document.getElementById('agitationMode').value !== 'intermittent') {
+        previewDiv.innerHTML = '<em>N/A - Continuous agitation mode</em>';
+        return;
+      }
+      
+      const multiplier = parseFloat(document.getElementById('inversionIntervalMultiplier').value) || 1;
+      const temp = parseFloat(document.getElementById('temperature').value);
+      
+      let baseInterval;
+      if (temp <= 80) {
+        baseInterval = 120;
+      } else if (temp >= 85 && temp <= 90) {
+        baseInterval = 60;
+      } else {
+        baseInterval = 30;
+      }
+      
+      const actualInterval = Math.round(baseInterval * multiplier);
+      
+      if (multiplier === 1) {
+        previewDiv.innerHTML = `Interval: <strong>${actualInterval}s</strong> (standard CS41 timing)`;
+      } else {
+        previewDiv.innerHTML = `Interval: <strong>${actualInterval}s</strong> (${multiplier.toFixed(1)}x standard)`;
+      }
+    }
+    
+    // Validate inversion configuration
+    function validateInversionConfiguration() {
+      if (document.getElementById('agitationMode').value !== 'intermittent') {
+        return { valid: true };
+      }
+      
+      const inversionCount = parseInt(document.getElementById('inversionNumber').value) || 4;
+      const inversionSoundInterval = parseFloat(document.getElementById('inversionInterval').value) * 1000;
+      const multiplier = parseFloat(document.getElementById('inversionIntervalMultiplier').value) || 1;
+      const temp = parseFloat(document.getElementById('temperature').value);
+      
+      // Get base interval for temperature
+      let baseInterval;
+      if (temp <= 80) {
+        baseInterval = 120;
+      } else if (temp >= 85 && temp <= 90) {
+        baseInterval = 60;
+      } else {
+        baseInterval = 30;
+      }
+      
+      const actualInterval = Math.round(baseInterval * multiplier);
+      const roundDuration = (inversionCount * inversionSoundInterval) / 1000; // in seconds
+      const minimumSafetyMargin = 5; // seconds
+      
+      if (roundDuration + minimumSafetyMargin >= actualInterval) {
+        return {
+          valid: false,
+          message: `Inversion round duration (${roundDuration.toFixed(1)}s) plus safety margin (${minimumSafetyMargin}s) exceeds available interval (${actualInterval}s). Reduce inversions, sound interval, or increase interval multiplier.`
+        };
+      }
+      
+      return { valid: true };
+    }
+    
+    // Update explanation
+    function updateExplanation() {
+      const tempF = parseFloat(document.getElementById('temperature').value);
+      const tempC = ((tempF - 32) * 5 / 9).toFixed(1);
+      const baseTime = baseDevTimes[tempF];
+      const pushPullMode = document.getElementById('pushPullMode').value;
+      const devType = document.querySelector('.dev-type-option.active').dataset.value;
+      
+      let finalTime = baseTime;
+      let pushPullInfo = '';
+      
+      // Apply push/pull if enabled
+      if (pushPullMode === 'pushpull' && tempF >= 85 && tempF <= 102) {
+        const ppValue = parseInt(document.getElementById('pushPullValue').value) || 0;
+        finalTime *= (1 + ppValue * 0.3);
+        if (ppValue !== 0) {
+          const sign = ppValue > 0 ? '+' : '';
+          pushPullInfo = `<strong>Push/Pull:</strong> ${sign}${ppValue} stop${Math.abs(ppValue) !== 1 ? 's' : ''} (${sign}${ppValue * 30}% time)<br>`;
+        }
+      }
+      
+      let chemistryInfo = '';
+      if (devType === 'reused') {
+        const volume = document.getElementById('volume').value;
+        const films = parseInt(document.getElementById('filmsProcessed').value) || 1;
+        const extraPercent = volume === 'pint' ? 0.04 : volume === 'quart' ? 0.02 : 0.005;
+        const multiplier = 1 + extraPercent * films;
+        finalTime *= multiplier;
+        chemistryInfo = `<strong>Chemistry:</strong> ${films} film(s) processed with ${volume.toUpperCase()} (${volumeML[volume]} ml), adding ${(extraPercent * 100).toFixed(1)}% per film.<br>`;
+      }
+      
+      let inversionInfo = '';
+      const inversionNum = parseInt(document.getElementById('inversionNumber').value) || 4;
+      const intervalMultiplier = parseFloat(document.getElementById('inversionIntervalMultiplier').value) || 1;
+      
+      if (document.getElementById('agitationMode').value === 'intermittent') {
+        let baseInterval;
+        if (tempF <= 80) {
+          baseInterval = 120;
+          inversionInfo = `<br><strong>Agitation:</strong> ${inversionNum} inversions at start, then ${inversionNum} inversions every ${Math.round(baseInterval * intervalMultiplier)}s`;
+        } else if (tempF >= 85 && tempF <= 90) {
+          baseInterval = 60;
+          inversionInfo = `<br><strong>Agitation:</strong> ${inversionNum} inversions at start, then ${inversionNum} inversions every ${Math.round(baseInterval * intervalMultiplier)}s`;
+        } else {
+          baseInterval = 30;
+          inversionInfo = `<br><strong>Agitation:</strong> ${inversionNum} inversions at start, then ${inversionNum} inversions every ${Math.round(baseInterval * intervalMultiplier)}s`;
+        }
+        
+        if (intervalMultiplier !== 1) {
+          inversionInfo += ` (${intervalMultiplier.toFixed(1)}x standard)`;
+        }
+      }
+      
+      // Calculate blix time
+      const blixTime = calculateBlixTime();
+      const blixMode = document.querySelector('input[name="blixMode"]:checked').value;
+      const blixInfo = blixMode === 'dynamic' ? 
+        `<br><strong>Blix time:</strong> ${blixTime.toFixed(2)} min (dynamic adjustment)` :
+        `<br><strong>Blix time:</strong> ${blixTime.toFixed(1)} min (adjustable in advanced settings)`;
+      
+      document.getElementById('explanation').innerHTML = `
+        <strong>Temperature:</strong> ${tempF}°F (≈${tempC}°C)<br>
+        <strong>Base time:</strong> ${baseTime} min<br>
+        ${pushPullInfo}
+        ${chemistryInfo}
+        <strong>Development time:</strong> ${finalTime.toFixed(2)} min
+        ${blixInfo}
+        ${inversionInfo}
+      `;
+      
+      // Update interval preview
+      updateIntervalPreview();
+      
+      // Validate configuration whenever explanation updates
+      const validation = validateInversionConfiguration();
+      const warningDiv = document.getElementById('inversionValidationWarning');
+      const startButton = document.getElementById('calculateAndStart');
+      
+      if (!validation.valid) {
+        warningDiv.style.display = 'block';
+        document.getElementById('validationMessage').textContent = validation.message;
+        startButton.disabled = true;
+        startButton.style.opacity = '0.5';
+      } else {
+        warningDiv.style.display = 'none';
+        startButton.disabled = false;
+        startButton.style.opacity = '1';
+      }
+    }
+    
+    // Update push/pull availability based on temperature
+    function updatePushPullAvailability() {
+      const tempF = parseInt(document.getElementById('temperature').value);
+      const pushPullModeSelect = document.getElementById('pushPullModeSelect');
+      const pushPullMode = document.getElementById('pushPullMode');
+      
+      if (tempF >= 85 && tempF <= 102) {
+        pushPullModeSelect.style.opacity = '1';
+        pushPullModeSelect.style.pointerEvents = 'auto';
+      } else {
+        pushPullModeSelect.style.opacity = '0.6';
+        pushPullModeSelect.style.pointerEvents = 'none';
+        pushPullMode.value = 'standard';
+        pushPullModeSelect.querySelector('.custom-select-trigger span').textContent = 'Standard Processing';
+        document.getElementById('pushPullSelector').style.display = 'none';
+      }
+      updateExplanation();
+    }
+    
+    // Inversion scheduling
+    function startInitialInversion() {
+      // Don't start if already in a series
+      if (isInversionSeries) return;
+      
+      // Simply trigger one series of inversions with the configured number
+      triggerInversionSeries();
+    }
+    
+    function triggerInversionSeries(current = 1) {
+      const maxInversions = parseInt(document.getElementById('inversionNumber').value) || 4;
+      
+      if (current === 1) {
+        // Double-check we're not already in a series
+        if (isInversionSeries) {
+          console.warn('Attempted to start inversion series while one is already active');
+          return;
+        }
+        isInversionSeries = true;
+      }
+      
+      if (current > maxInversions || remainingSeconds * 1000 < inversionSoundInterval * (maxInversions + 1 - current)) {
+        isInversionSeries = false;
+        lastInversionEndTime = Date.now(); // Track when this series ended
+        
+        // If this was the initial inversion series, set the next inversion time
+        const elapsed = Date.now() - phaseStartTimestamp;
+        if (elapsed < currentInitialInversionDelay + 5000) { // Within initial period + buffer
+          nextInversionTime = lastInversionEndTime + currentSubsequentInversionInterval;
+        }
+        updateInversionCountdown();
+        return;
+      }
+      
+      audioSystem.play('inversion');
+      displayInversionMessage(`PERFORM INVERSION ${current}/${maxInversions}`, 0);
+      flashTimerDisplay('inversion');
+      
+      setTimeout(() => {
+        if (!isPaused) { // Only continue if not paused
+          triggerInversionSeries(current + 1);
+        } else {
+          // If paused, end the series
+          isInversionSeries = false;
+          lastInversionEndTime = Date.now();
+        }
+      }, inversionSoundInterval);
+    }
+    
+    function scheduleSubsequentInversionSeries() {
+      if (remainingSeconds * 1000 < 8000) return;
+      
+      // Don't schedule if a series is already active
+      if (isInversionSeries) {
+        // Reschedule this check after a short delay
+        setTimeout(() => {
+          if (!isPaused) {
+            scheduleSubsequentInversionSeries();
+          }
+        }, 1000);
+        return;
+      }
+      
+      // Calculate delay from the end of the last inversion series
+      const now = Date.now();
+      let delay;
+      
+      if (lastInversionEndTime) {
+        // Calculate time since last inversion ended
+        const timeSinceLastInversion = now - lastInversionEndTime;
+        
+        // If it's been longer than the interval, schedule immediately
+        if (timeSinceLastInversion >= currentSubsequentInversionInterval) {
+          delay = 1000; // Start in 1 second
+        } else {
+          // Otherwise, wait for the remaining time
+          delay = currentSubsequentInversionInterval - timeSinceLastInversion;
+        }
+      } else {
+        // Fallback to old logic if no end time tracked
+        const elapsed = now - phaseStartTimestamp;
+        delay = currentSubsequentInversionInterval - ((elapsed - currentInitialInversionDelay) % currentSubsequentInversionInterval);
+      }
+      
+      // Set next inversion time for countdown
+      nextInversionTime = now + delay;
+      updateInversionCountdown();
+      
+      // Pre-announce inversions 3 seconds before
+      const preAnnounceDelay = Math.max(0, delay - 3000);
+      
+      setTimeout(() => {
+        if ((currentPhase === 'development' || currentPhase === 'blix') && !isPaused && !isInversionSeries) {
+          audioSystem.play('prepare');
+          displayInversionMessage('PREPARE FOR INVERSION');
+          flashTimerDisplay('prepare');
+        }
+      }, preAnnounceDelay);
+      
+      subsequentInversionTimeout = setTimeout(() => {
+        if ((currentPhase === 'development' || currentPhase === 'blix') && !isPaused) {
+          // Final check before triggering - ensure no series is active
+          if (!isInversionSeries) {
+            triggerInversionSeries();
+            // Schedule the next series immediately after triggering
+            setTimeout(() => {
+              scheduleSubsequentInversionSeries();
+            }, 100);
+          } else {
+            // If a series is somehow still active, reschedule
+            scheduleSubsequentInversionSeries();
+          }
+        }
+      }, delay);
+    }
+    
+    function startInversionScheduling() {
+      if (document.getElementById('agitationMode').value !== 'intermittent' || inversionScheduled) return;
+      
+      inversionScheduled = true;
+      
+      // Clear any existing subsequent timeout to prevent duplicates
+      if (subsequentInversionTimeout) {
+        clearTimeout(subsequentInversionTimeout);
+        subsequentInversionTimeout = null;
+      }
+      
+      // After the initial inversion period, schedule subsequent inversions
+      scheduleSubsequentInversionSeries();
+    }
+    
+    // Phase timer
+    function startPhaseTimer(duration, phase) {
+      if (isProcessRunning && phase === 'development') return; // Prevent double start
+      
+      isProcessRunning = true;
+      currentPhase = phase;
+      remainingSeconds = Math.round(duration * 60);
+      totalSeconds = remainingSeconds;
+      phaseStartTimestamp = Date.now();
+      
+      document.getElementById('phaseDisplay').textContent = `Phase: ${phase.charAt(0).toUpperCase() + phase.slice(1)}`;
+      document.getElementById('timerValue').textContent = formatTime(remainingSeconds);
+      
+      pauseButton.disabled = false;
+      pauseButton.textContent = 'Pause';
+      
+      audioSystem.play('start');
+      flashTimerDisplay('start');
+      
+      // Clear any existing intervals and timeouts before starting
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      if (initialInversionInterval) {
+        clearInterval(initialInversionInterval);
+        initialInversionInterval = null;
+      }
+      if (subsequentInversionTimeout) {
+        clearTimeout(subsequentInversionTimeout);
+        subsequentInversionTimeout = null;
+      }
+      if (inversionCountdownInterval) {
+        clearInterval(inversionCountdownInterval);
+        inversionCountdownInterval = null;
+      }
+      
+      // Reset all state variables
+      inversionScheduled = false;
+      nextInversionTime = null;
+      isInversionSeries = false;
+      lastInversionEndTime = null;
+      
+      // Set inversion parameters
+      if (phase === 'development') {
+        const temp = parseFloat(document.getElementById('temperature').value);
+        const multiplier = parseFloat(document.getElementById('inversionIntervalMultiplier').value) || 1;
+        
+        if (temp <= 80) {
+          currentInitialInversionDelay = 60000; // 60s initial continuous
+          currentSubsequentInversionInterval = Math.round(120000 * multiplier);
+        } else if (temp >= 85 && temp <= 90) {
+          currentInitialInversionDelay = 30000; // 30s initial continuous
+          currentSubsequentInversionInterval = Math.round(60000 * multiplier);
+        } else {
+          currentInitialInversionDelay = 10000; // 10s initial continuous
+          currentSubsequentInversionInterval = Math.round(30000 * multiplier);
+        }
+      } else {
+        currentInitialInversionDelay = 10000;
+        currentSubsequentInversionInterval = Math.round(30000 * (parseFloat(document.getElementById('inversionIntervalMultiplier').value) || 1));
+      }
+      
+      // Get inversion count setting
+      const inversionCount = parseInt(document.getElementById('inversionNumber').value) || 4;
+      
+      if (document.getElementById('agitationMode').value === 'intermittent') {
+        // Show initial message
+        displayInversionMessage('Process started, perform inversions when prompted', 3000);
+        
+        // Start the first inversion series immediately
+        setTimeout(() => {
+          if (!isPaused && !isInversionSeries) {
+            startInitialInversion();
+          }
+        }, 500);
+        
+        // Schedule subsequent inversions after the initial delay period
+        setTimeout(() => {
+          if (!isPaused) {
+            startInversionScheduling();
+          }
+        }, currentInitialInversionDelay);
+        
+        // Start countdown interval
+        inversionCountdownInterval = setInterval(updateInversionCountdown, 1000);
+      }
+      
+      // Reset progress bar
+      progressBar.style.width = '0%';
+      
+      timerInterval = setInterval(() => {
+        if (!isPaused) {
+          remainingSeconds--;
+          document.getElementById('timerValue').textContent = formatTime(remainingSeconds);
+          updateProgressBar();
+          
+          if (remainingSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            if (initialInversionInterval) {
+              clearInterval(initialInversionInterval);
+              initialInversionInterval = null;
+            }
+            if (subsequentInversionTimeout) {
+              clearTimeout(subsequentInversionTimeout);
+              subsequentInversionTimeout = null;
+            }
+            if (inversionCountdownInterval) {
+              clearInterval(inversionCountdownInterval);
+              inversionCountdownInterval = null;
+            }
+            nextInversionTime = null;
+            isInversionSeries = false;
+            
+            if (phase === 'development') {
+              audioSystem.play('phaseChange');
+              flashTimerDisplay('phase-change');
+              const blixTime = calculateBlixTime();
+              const delay = parseInt(document.getElementById('phaseDelay').value) * 1000;
+              startBlixTransition(blixTime, delay);
+            } else {
+              document.getElementById('phaseDisplay').textContent = 'Process Complete! Proceed with wash and stabilizer rinse.';
+              audioSystem.play('phaseEnd');
+              flashTimerDisplay('end');
+              pauseButton.disabled = true;
+              isProcessRunning = false;
+              progressBar.style.width = '100%';
+              
+              // Re-enable all settings
+              document.querySelectorAll('input, select, button, .dev-type-option, .agitation-option').forEach(element => {
+                if (!element.closest('.settings-panel')) {
+                  element.disabled = false;
+                  element.style.opacity = '1';
+                  element.style.pointerEvents = 'auto';
+                }
+              });
+            }
+          }
+        }
+      }, 1000);
+    }
+    
+    // Blix transition
+    function startBlixTransition(blixTime, delay) {
+      let countdown = delay / 1000;
+      document.getElementById('phaseDisplay').textContent = `Preparing for Blix: ${countdown}s`;
+      
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          document.getElementById('phaseDisplay').textContent = `Preparing for Blix: ${countdown}s`;
+        } else {
+          clearInterval(countdownInterval);
+          audioSystem.play('phaseChange');
+          startPhaseTimer(blixTime, 'blix');
+        }
+      }, 1000);
+    }
+    
+    // Add click sounds to all clickable elements
+    document.querySelectorAll('button, select, input[type="radio"], input[type="checkbox"], .dev-type-option, .agitation-option').forEach(element => {
+      element.addEventListener('click', () => {
+        audioSystem.play('click');
+      });
+    });
+    
+    // Event listeners
+    document.getElementById('calculateAndStart').addEventListener('click', () => {
+      if (isProcessRunning) return; // Prevent double start
+      
+      // Validate configuration before starting
+      const validation = validateInversionConfiguration();
+      if (!validation.valid) {
+        // This shouldn't happen as button should be disabled, but just in case
+        return;
+      }
+      
+      updateExplanation();
+      isPaused = false;
+      pauseStartTime = 0;
+      lastInversionEndTime = null; // Reset tracking
+      inversionScheduled = false;
+      isInversionSeries = false;
+      
+      const devTime = calculateDevelopmentTime();
+      
+      // Disable all settings inputs during process
+      document.querySelectorAll('input, select, button, .dev-type-option, .agitation-option').forEach(element => {
+        if (element.id !== 'pauseTimer' && element.id !== 'stopTimer' && 
+            !element.closest('.settings-panel') && !element.closest('.settings-toggle')) {
+          element.disabled = true;
+          element.style.opacity = '0.6';
+          element.style.pointerEvents = 'none';
+        }
+      });
+      
+      startPhaseTimer(devTime, 'development');
+      // Smooth scroll to timer
+      document.querySelector('.panel:last-child').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    });
+    
+    pauseButton.addEventListener('click', () => {
+      if (!isPaused) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        if (initialInversionInterval) {
+          clearInterval(initialInversionInterval);
+          initialInversionInterval = null;
+        }
+        if (subsequentInversionTimeout) {
+          clearTimeout(subsequentInversionTimeout);
+          subsequentInversionTimeout = null;
+        }
+        if (inversionCountdownInterval) {
+          clearInterval(inversionCountdownInterval);
+          inversionCountdownInterval = null;
+        }
+        inversionScheduled = false;
+        isPaused = true;
+        pauseStartTime = Date.now();
+        pauseButton.textContent = 'Resume';
+        audioSystem.play('pause');
+        document.getElementById('inversionMessage').textContent = 'PAUSED';
+        
+        // If we're in the middle of an inversion series, mark it as ended
+        if (isInversionSeries) {
+          isInversionSeries = false;
+          lastInversionEndTime = Date.now();
+        }
+      } else {
+        const pauseDuration = Date.now() - pauseStartTime;
+        phaseStartTimestamp += pauseDuration;
+        if (lastInversionEndTime) {
+          lastInversionEndTime += pauseDuration; // Adjust the last inversion end time
+        }
+        isPaused = false;
+        pauseButton.textContent = 'Pause';
+        audioSystem.play('resume');
+        
+        // Resume countdown updates
+        if (document.getElementById('agitationMode').value === 'intermittent') {
+          inversionCountdownInterval = setInterval(updateInversionCountdown, 1000);
+          updateInversionCountdown();
+        }
+        
+        timerInterval = setInterval(() => {
+          remainingSeconds--;
+          document.getElementById('timerValue').textContent = formatTime(remainingSeconds);
+          updateProgressBar();
+          
+          if (remainingSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            if (initialInversionInterval) {
+              clearInterval(initialInversionInterval);
+              initialInversionInterval = null;
+            }
+            if (subsequentInversionTimeout) {
+              clearTimeout(subsequentInversionTimeout);
+              subsequentInversionTimeout = null;
+            }
+            if (inversionCountdownInterval) {
+              clearInterval(inversionCountdownInterval);
+              inversionCountdownInterval = null;
+            }
+            isInversionSeries = false;
+            
+            if (currentPhase === 'development') {
+              audioSystem.play('phaseChange');
+              flashTimerDisplay('phase-change');
+              const blixTime = calculateBlixTime();
+              const delay = parseInt(document.getElementById('phaseDelay').value) * 1000;
+              startBlixTransition(blixTime, delay);
+            } else {
+              document.getElementById('phaseDisplay').textContent = 'Process Complete! Proceed with wash and stabilizer rinse.';
+              audioSystem.play('phaseEnd');
+              flashTimerDisplay('end');
+              pauseButton.disabled = true;
+              isProcessRunning = false;
+              
+              // Re-enable all settings
+              document.querySelectorAll('input, select, button, .dev-type-option, .agitation-option').forEach(element => {
+                if (!element.closest('.settings-panel')) {
+                  element.disabled = false;
+                  element.style.opacity = '1';
+                  element.style.pointerEvents = 'auto';
+                }
+              });
+            }
+          }
+        }, 1000);
+        
+        if (document.getElementById('agitationMode').value === 'intermittent') {
+          // Clear any existing timeouts first
+          if (subsequentInversionTimeout) {
+            clearTimeout(subsequentInversionTimeout);
+            subsequentInversionTimeout = null;
+          }
+          
+          // Check if we're still in the initial period
+          const elapsed = Date.now() - phaseStartTimestamp;
+          if (elapsed < currentInitialInversionDelay) {
+            // If we're still in the initial period and haven't done the initial inversions yet,
+            // wait for the remaining time before scheduling subsequent inversions
+            setTimeout(() => {
+              if (!isPaused) {
+                startInversionScheduling();
+              }
+            }, currentInitialInversionDelay - elapsed);
+          } else {
+            // Otherwise, resume normal scheduling
+            // Reset the inversionScheduled flag to allow rescheduling
+            inversionScheduled = false;
+            startInversionScheduling();
+          }
+        }
+      }
+    });
+    
+    document.getElementById('stopTimer').addEventListener('click', () => {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      if (initialInversionInterval) {
+        clearInterval(initialInversionInterval);
+        initialInversionInterval = null;
+      }
+      if (subsequentInversionTimeout) {
+        clearTimeout(subsequentInversionTimeout);
+        subsequentInversionTimeout = null;
+      }
+      if (inversionCountdownInterval) {
+        clearInterval(inversionCountdownInterval);
+        inversionCountdownInterval = null;
+      }
+      
+      // Reset all flags
+      isInversionSeries = false;
+      inversionScheduled = false;
+      isProcessRunning = false;
+      
+      audioSystem.play('stop');
+      
+      // Reload the page after a short delay to allow the sound to play
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
+    });
+    
+    // Input change listeners
+    document.querySelectorAll('#temperature, #pushPullMode, #agitationMode, #blixTime, #volume, #filmsProcessed, #inversionInterval, #inversionNumber, #inversionIntervalMultiplier').forEach(input => {
+      input.addEventListener('change', () => {
+        if (input.id === 'temperature') {
+          updatePushPullAvailability();
+          updateIntervalPreview(); // Update preview when temperature changes
+        }
+        updateExplanation();
+      });
+    });
+    
+    // Push/Pull mode toggle
+    document.getElementById('pushPullMode').addEventListener('change', (e) => {
+      if (e.target.value === 'pushpull') {
+        document.getElementById('pushPullSelector').style.display = 'block';
+        // Default to +1 when enabling push/pull
+        document.getElementById('pushPullValue').value = '1';
+        document.getElementById('ppValue').textContent = '+1';
+      } else {
+        document.getElementById('pushPullSelector').style.display = 'none';
+      }
+      updateExplanation();
+    });
+    
+    // Push/Pull controls
+    document.getElementById('ppIncrease').addEventListener('click', () => {
+      const current = parseInt(document.getElementById('pushPullValue').value) || 1;
+      if (current === -1) {
+        // Jump from -1 to +1 (skip 0)
+        document.getElementById('pushPullValue').value = '1';
+        document.getElementById('ppValue').textContent = '+1';
+      } else {
+        const newValue = Math.min(current + 1, 3);
+        document.getElementById('pushPullValue').value = newValue;
+        document.getElementById('ppValue').textContent = `+${newValue}`;
+      }
+      updatePPLabel();
+      updateExplanation();
+    });
+    
+    document.getElementById('ppDecrease').addEventListener('click', () => {
+      const current = parseInt(document.getElementById('pushPullValue').value) || 1;
+      if (current === 1) {
+        // Jump from +1 to -1 (skip 0)
+        document.getElementById('pushPullValue').value = '-1';
+        document.getElementById('ppValue').textContent = '-1';
+      } else {
+        const newValue = Math.max(current - 1, -1);
+        document.getElementById('pushPullValue').value = newValue;
+        document.getElementById('ppValue').textContent = newValue > 0 ? `+${newValue}` : newValue;
+      }
+      updatePPLabel();
+      updateExplanation();
+    });
+    
+    function updatePPLabel() {
+      const value = parseInt(document.getElementById('pushPullValue').value);
+      document.querySelector('.pp-label').textContent = Math.abs(value) === 1 ? 'stop' : 'stops';
+    }
+    
+    // Developer type selector
+    document.querySelectorAll('.dev-type-option').forEach(option => {
+      option.addEventListener('click', () => {
+        document.querySelectorAll('.dev-type-option').forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+        
+        if (option.dataset.value === 'reused') {
+          document.getElementById('reuseFields').style.display = 'block';
+        } else {
+          document.getElementById('reuseFields').style.display = 'none';
+        }
+        updateExplanation();
+      });
+    });
+    
+    // Films counter
+    document.getElementById('filmsIncrease').addEventListener('click', () => {
+      const current = parseInt(document.getElementById('filmsProcessed').value) || 1;
+      const newValue = Math.min(current + 1, 50);
+      document.getElementById('filmsProcessed').value = newValue;
+      document.getElementById('filmsCount').textContent = newValue;
+      updateExplanation();
+    });
+    
+    document.getElementById('filmsDecrease').addEventListener('click', () => {
+      const current = parseInt(document.getElementById('filmsProcessed').value) || 1;
+      const newValue = Math.max(current - 1, 1);
+      document.getElementById('filmsProcessed').value = newValue;
+      document.getElementById('filmsCount').textContent = newValue;
+      updateExplanation();
+    });
+    
+    // Agitation mode selector
+    document.querySelectorAll('.agitation-option').forEach(option => {
+      option.addEventListener('click', () => {
+        document.querySelectorAll('.agitation-option').forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+        document.getElementById('agitationMode').value = option.dataset.value;
+        
+        // Show/hide note for continuous agitation
+        const note = document.querySelector('.agitation-note');
+        if (option.dataset.value === 'continuous') {
+          note.style.display = 'block';
+        } else {
+          note.style.display = 'none';
+        }
+        
+        updateIntervalPreview();
+        updateExplanation();
+      });
+    });
+    
+    // Blix mode toggle
+    document.querySelectorAll('input[name="blixMode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.value === 'dynamic') {
+          document.getElementById('fixedBlixTime').style.display = 'none';
+        } else {
+          document.getElementById('fixedBlixTime').style.display = 'block';
+        }
+        updateExplanation();
+      });
+    });
+    
+    // Inversion count controls
+    document.getElementById('inversionIncrease').addEventListener('click', () => {
+      if (isProcessRunning) return; // Don't allow changes during process
+      
+      const current = parseInt(document.getElementById('inversionNumber').value) || 4;
+      const newValue = Math.min(current + 1, 10);
+      document.getElementById('inversionNumber').value = newValue;
+      document.getElementById('inversionCount').textContent = newValue;
+      updateExplanation(); // This will validate and update all displays
+    });
+    
+    document.getElementById('inversionDecrease').addEventListener('click', () => {
+      if (isProcessRunning) return; // Don't allow changes during process
+      
+      const current = parseInt(document.getElementById('inversionNumber').value) || 4;
+      const newValue = Math.max(current - 1, 1);
+      document.getElementById('inversionNumber').value = newValue;
+      document.getElementById('inversionCount').textContent = newValue;
+      updateExplanation(); // This will validate and update all displays
+    });
+    
+    // Interval multiplier controls
+    document.getElementById('intervalMultIncrease').addEventListener('click', () => {
+      if (isProcessRunning) return; // Don't allow changes during process
+      
+      const current = parseFloat(document.getElementById('inversionIntervalMultiplier').value) || 1;
+      const newValue = Math.round((current + 0.1) * 10) / 10; // Round to 1 decimal place
+      const finalValue = Math.min(newValue, 3.0);
+      document.getElementById('inversionIntervalMultiplier').value = finalValue;
+      document.getElementById('intervalMultValue').textContent = finalValue.toFixed(1);
+      updateIntervalPreview();
+      updateExplanation();
+      audioSystem.play('click');
+    });
+    
+    document.getElementById('intervalMultDecrease').addEventListener('click', () => {
+      if (isProcessRunning) return; // Don't allow changes during process
+      
+      const current = parseFloat(document.getElementById('inversionIntervalMultiplier').value) || 1;
+      const newValue = Math.round((current - 0.1) * 10) / 10; // Round to 1 decimal place
+      const finalValue = Math.max(newValue, 0.5);
+      document.getElementById('inversionIntervalMultiplier').value = finalValue;
+      document.getElementById('intervalMultValue').textContent = finalValue.toFixed(1);
+      updateIntervalPreview();
+      updateExplanation();
+      audioSystem.play('click');
+    });
+    
+    // Custom dropdown functionality
+    function initCustomDropdowns() {
+      const customSelects = document.querySelectorAll('.custom-select');
+      
+      customSelects.forEach(customSelect => {
+        const trigger = customSelect.querySelector('.custom-select-trigger');
+        const options = customSelect.querySelectorAll('.custom-select-option');
+        const hiddenInput = customSelect.nextElementSibling;
+        
+        trigger.addEventListener('click', () => {
+          // Close all other dropdowns
+          customSelects.forEach(other => {
+            if (other !== customSelect) {
+              other.classList.remove('open');
+            }
+          });
+          
+          customSelect.classList.toggle('open');
+          audioSystem.play('click');
+        });
+        
+        options.forEach(option => {
+          option.addEventListener('click', () => {
+            const value = option.dataset.value;
+            const text = option.textContent;
+            
+            trigger.querySelector('span').textContent = text;
+            hiddenInput.value = value;
+            
+            options.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            customSelect.classList.remove('open');
+            
+            // Trigger change event
+            const event = new Event('change');
+            hiddenInput.dispatchEvent(event);
+            
+            // Update interval preview if temperature changed
+            if (hiddenInput.id === 'temperature') {
+              updateIntervalPreview();
+            }
+            
+            audioSystem.play('click');
+          });
+        });
+      });
+      
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-select')) {
+          customSelects.forEach(select => select.classList.remove('open'));
+        }
+      });
+    }
+    
+    // Initialize
+    window.addEventListener('load', () => {
+      updatePushPullAvailability();
+      updateExplanation();
+      updateIntervalPreview();
+      initCustomDropdowns();
+      
+      // Request audio context on first interaction
+      document.addEventListener('click', () => {
+        if (audioSystem.audioCtx.state === 'suspended') {
+          audioSystem.audioCtx.resume();
+        }
+      }, { once: true });
+    });
+  </script>
+</body>
+</html>
+      
